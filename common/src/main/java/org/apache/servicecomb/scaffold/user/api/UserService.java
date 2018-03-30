@@ -1,10 +1,9 @@
 package org.apache.servicecomb.scaffold.user.api;
 
+import org.springframework.http.ResponseEntity;
+
 public interface UserService {
+  ResponseEntity<LogonResponseDTO> logon(LogonRequestDTO user);
 
-  long logon(UserDTO user);
-
-  long login(UserDTO user);
-
-  UserDTO getUserInfo(String name);
+  ResponseEntity<LoginResponseDTO> login(LoginRequestDTO user);
 }
