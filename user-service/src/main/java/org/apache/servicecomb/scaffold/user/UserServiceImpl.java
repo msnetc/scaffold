@@ -1,6 +1,7 @@
 package org.apache.servicecomb.scaffold.user;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.servicecomb.provider.rest.common.RestSchema;
@@ -11,6 +12,7 @@ import org.apache.servicecomb.scaffold.user.api.LogonResponseDTO;
 import org.apache.servicecomb.scaffold.user.api.UserService;
 import org.apache.servicecomb.swagger.invocation.exception.InvocationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,9 +24,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserServiceImpl implements UserService {
   private final UserRepository repository;
 
+  private final TokenStore tokenStore;
+
   @Autowired
-  public UserServiceImpl(UserRepository repository) {
+  public UserServiceImpl(UserRepository repository, TokenStore tokenStore) {
     this.repository = repository;
+    this.tokenStore = tokenStore;
   }
 
   @Override
@@ -49,7 +54,10 @@ public class UserServiceImpl implements UserService {
       UserEntity dbUser = repository.findByName(user.getName());
       if (dbUser != null) {
         if (dbUser.getPassword().equals(user.getPassword())) {
-          return new ResponseEntity<>(new LoginResponseDTO(), HttpStatus.OK);
+          String token = tokenStore.generate(user.getName());
+          HttpHeaders headers = generateAuthenticationHeaders(token);
+          //add authentication header
+          return new ResponseEntity<>(new LoginResponseDTO(), headers, HttpStatus.OK);
         }
         throw new InvocationException(BAD_REQUEST, "wrong password");
       }
@@ -64,5 +72,11 @@ public class UserServiceImpl implements UserService {
 
   private boolean validateUser(LoginRequestDTO user) {
     return user != null && StringUtils.isNotEmpty(user.getName()) && StringUtils.isNotEmpty(user.getPassword());
+  }
+
+  private HttpHeaders generateAuthenticationHeaders(String token) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(AUTHORIZATION, token);
+    return headers;
   }
 }
