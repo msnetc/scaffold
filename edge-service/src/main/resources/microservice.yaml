@@ -12,6 +12,10 @@ cse:
       thread-count: 8
     client:
       thread-count: 8
+  handler:
+    chain:
+      Consumer:
+        default: authentication,loadbalance
   executors:
       default: cse.executor.groupThreadPool
 

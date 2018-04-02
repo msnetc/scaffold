@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <handler id="authentication" class="org.apache.servicecomb.scaffold.edge.handler.AuthenticationHandler"/>
+</config>
