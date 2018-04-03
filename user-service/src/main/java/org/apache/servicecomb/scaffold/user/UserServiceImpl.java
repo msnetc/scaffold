@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +65,19 @@ public class UserServiceImpl implements UserService {
       throw new InvocationException(BAD_REQUEST, "user name not exist");
     }
     throw new InvocationException(BAD_REQUEST, "incorrect user");
+  }
+
+  @Override
+  @GetMapping(path = "getDeposit")
+  public double getDeposit(String userName) {
+    if (StringUtils.isNotEmpty(userName)) {
+      UserEntity dbUser = repository.findByName(userName);
+      if (dbUser != null) {
+        return dbUser.getDeposit();
+      }
+      throw new InvocationException(BAD_REQUEST, "user name not exist");
+    }
+    throw new InvocationException(BAD_REQUEST, "incorrect user name");
   }
 
   private boolean validateUser(LogonRequestDTO user) {

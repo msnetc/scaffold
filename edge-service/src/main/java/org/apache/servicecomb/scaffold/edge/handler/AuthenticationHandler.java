@@ -27,7 +27,7 @@ public class AuthenticationHandler implements Handler {
   @Override
   public void handle(Invocation invocation, AsyncResponse asyncResponse) throws Exception {
     //只有外部到Edge的调用才需要Token认证，Edge与内部微服务之间的调用不需要认证
-    if (isEdgeInvocation(invocation)) {
+    if (isEdgeProxyInvocation(invocation)) {
       if (!authenticateEdgeInvocation(invocation, asyncResponse)) {
         return;
       }
@@ -35,7 +35,7 @@ public class AuthenticationHandler implements Handler {
     invocation.next(asyncResponse);
   }
 
-  private boolean isEdgeInvocation(Invocation invocation) {
+  private boolean isEdgeProxyInvocation(Invocation invocation) {
     return invocation.getHandlerContext().containsKey(REST_REQUEST);
   }
 
@@ -44,8 +44,7 @@ public class AuthenticationHandler implements Handler {
     if (isValidateInvocation(invocation)) {
       asyncResponse.consumerFail(new InvocationException(Status.BAD_REQUEST, "unsupported invoke validate by edge"));
       return false;
-    } else if (!isLoginOrLogonInvocation(invocation)) {
-      //不是Login和Logon的一律需要校验Token
+    } else if (!isValidationRequiredInvocation(invocation)) {
       String token = ((VertxServerRequestToHttpServletRequest) invocation.getHandlerContext()
           .get(REST_REQUEST)).getHeader(AUTHORIZATION);
       if (StringUtils.isNotEmpty(token)) {
@@ -67,7 +66,8 @@ public class AuthenticationHandler implements Handler {
     return "user-service".equals(invocation.getMicroserviceName()) && "validate".equals(invocation.getOperationName());
   }
 
-  private boolean isLoginOrLogonInvocation(Invocation invocation) {
+  //不是Login和Logon的一律需要校验Token
+  private boolean isValidationRequiredInvocation(Invocation invocation) {
     return "user-service".equals(invocation.getMicroserviceName()) &&
         ("login".equals(invocation.getOperationName()) || "logon".equals(invocation.getOperationName()));
   }
