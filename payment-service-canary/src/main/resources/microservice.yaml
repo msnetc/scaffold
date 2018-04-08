@@ -1,0 +1,14 @@
+APPLICATION_ID: scaffold
+service_description:
+  name: payment-service
+  version: 1.0.0
+cse:
+  service:
+    registry:
+      address: http://127.0.0.1:30100
+      instance:
+        watch: false
+  rest:
+    address: 0.0.0.0:8193
+    server:
+      thread-count: 10
