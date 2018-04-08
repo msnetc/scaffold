@@ -25,3 +25,5 @@ edge:
   routes:
     #http://localhost:8090/user 等价于 http://localhost:8090/user-service
     user: user-service
+    #http://localhost:8090/payment 等价于 http://localhost:8090/payment-service
+    payment: payment-service
