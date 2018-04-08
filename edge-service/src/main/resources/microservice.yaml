@@ -12,6 +12,8 @@ cse:
       thread-count: 8
     client:
       thread-count: 8
+  executors:
+      default: cse.executor.groupThreadPool
 
 #自定义的edge.routes.xxx映射到微服务serviceName
 #如此一来就可以重新定义路径与微服务的映射关系
