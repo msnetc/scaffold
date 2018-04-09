@@ -1,7 +1,7 @@
 APPLICATION_ID: scaffold
 service_description:
   name: payment-service
-  version: 1.0.0
+  version: 0.0.2
 cse:
   service:
     registry:

@@ -24,6 +24,13 @@ cse:
 edge:
   routes:
     #http://localhost:8090/user 等价于 http://localhost:8090/user-service
-    user: user-service
+    user:
+      service: user-service
     #http://localhost:8090/payment 等价于 http://localhost:8090/payment-service
-    payment: payment-service
+    payment:
+      service: payment-service
+      #如果请求的User-Agent中包含dev，则指向0.0.2版本的payment-service(payment-service-canary)
+      dark-launch-rules: "{\"headerRules\":{\"User-Agent\":[{\"operator\":\"CONTAINS\",\"value\":\"dev\",\"version\":\"0.0.2\"}]},\"defaultVersion\":\"0.0.1\"}"
+
+
+
