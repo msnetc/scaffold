@@ -16,6 +16,7 @@ cse:
     chain:
       Consumer:
         default: authentication,loadbalance
+  #TODO: 将改进为异步调用Reactive模式
   executors:
       default: cse.executor.groupThreadPool
 

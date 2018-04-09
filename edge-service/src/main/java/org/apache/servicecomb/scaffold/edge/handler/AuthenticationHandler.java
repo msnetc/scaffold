@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 public class AuthenticationHandler implements Handler {
   private static final String REST_REQUEST = "servicecomb-rest-request";
 
+  //TODO: 同步调用，将改进为异步调用CseAsyncRestTemplate
   private final RestTemplate restTemplate = RestTemplateBuilder.create();
 
   @Override
