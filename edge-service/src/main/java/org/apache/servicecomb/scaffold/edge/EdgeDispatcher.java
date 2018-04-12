@@ -1,7 +1,6 @@
 package org.apache.servicecomb.scaffold.edge;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.config.DynamicPropertyFactory;
-import com.netflix.config.DynamicStringProperty;
 
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -28,9 +26,9 @@ public class EdgeDispatcher extends AbstractEdgeDispatcher {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EdgeDispatcher.class);
 
-  private final Map<String, DynamicStringProperty> properties = new ConcurrentHashMap<>();
+  //private final Map<String, DynamicStringProperty> properties = new ConcurrentHashMap<>();
 
-  private final Map<String, DarkLaunchRule> rules = new HashMap<>();
+  private final Map<String, DynamicDarkLaunchSetting> rules = new ConcurrentHashMap<>();
 
   public int getOrder() {
     return 10000;
@@ -48,28 +46,33 @@ public class EdgeDispatcher extends AbstractEdgeDispatcher {
     final String service = pathParams.get("param0");
     String path = "/" + pathParams.get("param1");
 
-    String serviceName = DynamicPropertyFactory.getInstance()
+    final String serviceName = DynamicPropertyFactory.getInstance()
         .getStringProperty("edge.routes." + service + ".service", service).get();
 
+    String config = DynamicPropertyFactory.getInstance()
+        .getStringProperty("edge.routes." + service + ".dark-launch-rules", "").getValue();
+    DynamicDarkLaunchSetting setting;
     if (!rules.containsKey(service)) {
-      properties.computeIfAbsent(service, s -> {
-        DynamicStringProperty property = DynamicPropertyFactory.getInstance()
-            .getStringProperty("edge.routes." + service + ".dark-launch-rules", "");
-        rules.put(service, parseRule(property.getValue()));
-        //灰度发布配置更新的时候更新缓存
-        property.addCallback(() -> rules.put(service, parseRule(property.getValue())));
-        return property;
-      });
+      setting = rules
+          .computeIfAbsent(service, s -> new DynamicDarkLaunchSetting(config, parseRule(serviceName, config)));
+    } else {
+      setting = rules.get(service);
+      //如果灰度发布配置变化则更新配置，Java Chassis 1.0.0-m1中apollo尚不支持callBack通知
+      if (!setting.getConfig().equals(config)) {
+        setting = new DynamicDarkLaunchSetting(config, parseRule(serviceName, config));
+        rules.put(service, setting);
+      }
     }
 
     EdgeInvocation edgeInvocation = new EdgeInvocation();
-    edgeInvocation.setVersionRule(rules.get(service).matchVersion(context.request().headers().entries()));
+    edgeInvocation.setVersionRule(setting.getRule().matchVersion(context.request().headers().entries()));
 
     edgeInvocation.init(serviceName, context, path, httpServerFilters);
     edgeInvocation.edgeInvoke();
   }
 
-  private DarkLaunchRule parseRule(String config) {
+  private DarkLaunchRule parseRule(String serviceName, String config) {
+    LOGGER.info("Service : {} apply DarkLaunchRule : {}", serviceName, config);
     try {
       if (StringUtils.isNotEmpty(config)) {
         return OBJ_MAPPER.readValue(config, DarkLaunchRule.class);
