@@ -1,11 +1,11 @@
 APPLICATION_ID: scaffold
 service_description:
-  name: payment-service
-  version: 0.0.1
-cse:
+  name: payment
+  version: 2.0.0
+servicecomb:
   service:
     registry:
-      address: http://192.168.0.28:30100
+      address: http://127.0.0.1:30100
       instance:
         watch: false
   rest:

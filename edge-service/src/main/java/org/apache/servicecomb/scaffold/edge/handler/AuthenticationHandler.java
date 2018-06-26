@@ -13,6 +13,7 @@ import org.apache.servicecomb.provider.springmvc.reference.RestTemplateBuilder;
 import org.apache.servicecomb.swagger.invocation.AsyncResponse;
 import org.apache.servicecomb.swagger.invocation.InvocationType;
 import org.apache.servicecomb.swagger.invocation.exception.InvocationException;
+import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
 
 public class AuthenticationHandler implements Handler {
@@ -20,6 +21,7 @@ public class AuthenticationHandler implements Handler {
 
   //TODO: 同步调用，将改进为异步调用CseAsyncRestTemplate
   private final RestTemplate restTemplate = RestTemplateBuilder.create();
+  //private final AsyncRestTemplate asyncRestTemplate = AsyncRestTemplateBuilder.create();
 
   @Override
   public void init(MicroserviceMeta microserviceMeta, InvocationType invocationType) {

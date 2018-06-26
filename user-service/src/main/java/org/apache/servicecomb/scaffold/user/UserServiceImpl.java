@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(path = "/")
 public class UserServiceImpl implements UserService {
   private final UserRepository repository;
-
   private final TokenStore tokenStore;
 
   @Autowired
